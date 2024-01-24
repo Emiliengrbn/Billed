@@ -19,7 +19,7 @@ export default class NewBill {
   }
   handleChangeFile = (e) => {
     e.preventDefault();
-    const file = this.document.querySelector(`input[data-testid="file"]`)
+    let file = this.document.querySelector(`input[data-testid="file"]`)
       .files[0];
     const filePath = e.target.value.split(/\\/g);
     const fileName = filePath[filePath.length - 1];
@@ -27,32 +27,29 @@ export default class NewBill {
     const email = JSON.parse(localStorage.getItem("user")).email;
     formData.append("file", file);
     formData.append("email", email);
+    const imageFormats = ["image/png", "image/jpeg", "image/jpg"];
 
-    if (
-      file.type == "image/png" ||
-      file.type == "image/jpeg" ||
-      file.type == "image/jpg"
-    ) {
-      return this.store
-        .bills()
-        .create({
-          data: formData,
-          headers: {
-            noContentType: true,
-          },
-        })
-        .then(({ filePath, key }) => {
-          console.log(filePath);
-          this.billId = key;
-          this.fileUrl = filePath;
-          this.fileName = fileName;
-        });
-    } else {
+    if (!imageFormats.includes(file.type)) {
       alert("Veuillez choisir un fichier .png, .jpeg ou .jpg");
       this.document.querySelector(`input[data-testid="file"]`).value = "";
-      // return;
+      return;
     }
+
+    return this.store
+      .bills()
+      .create({
+        data: formData,
+        headers: {
+          noContentType: true,
+        },
+      })
+      .then(({ filePath, key }) => {
+        this.billId = key;
+        this.fileUrl = filePath;
+        this.fileName = fileName;
+      });
   };
+
   handleSubmit = (e) => {
     e.preventDefault();
     console.log(
