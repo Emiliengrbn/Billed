@@ -2,7 +2,7 @@
  * @jest-environment jsdom
  */
 import "@testing-library/jest-dom";
-import { screen, waitFor, fireEvent } from "@testing-library/dom";
+import { screen, waitFor } from "@testing-library/dom";
 import BillsUI from "../views/BillsUI.js";
 import { bills } from "../fixtures/bills.js";
 import { ROUTES_PATH } from "../constants/routes.js";
@@ -63,8 +63,6 @@ describe("Given I am connected as an employee", () => {
       await waitFor(() => screen.getByText("Mes notes de frais"));
       const noteDeFrais = await screen.getByText("Mes notes de frais");
       expect(noteDeFrais).toBeTruthy();
-      // const tableTitleType = await screen.getAllByText("Type");
-      // expect(tableTitleType).toBeTruthy();
     });
 
     describe("When i click on the NewBill button", () => {
@@ -98,7 +96,6 @@ describe("Given I am connected as an employee", () => {
 
     describe("When I click on Eye icon", () => {
       test("Then HandleClickIconEye is called", () => {
-        // connect as employee
         Object.defineProperty(window, "localStorage", {
           value: localStorageMock,
         });

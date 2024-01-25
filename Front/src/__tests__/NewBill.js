@@ -8,6 +8,7 @@ import NewBill from "../containers/NewBill.js";
 import { ROUTES_PATH } from "../constants/routes.js";
 import { localStorageMock } from "../__mocks__/localStorage.js";
 
+import mockStore from "../__mocks__/store.js";
 import router from "../app/Router.js";
 
 describe("Given I am connected as an employee", () => {
@@ -79,6 +80,55 @@ describe("Given I am connected as an employee", () => {
       fireEvent.submit(formNewBill);
 
       expect(handleSubmit).toHaveBeenCalled();
+    });
+
+    describe("When i submit the form", () => {
+      test("handleChangeFile calls store.bills().create", async () => {
+        document.body.innerHTML = NewBillUI();
+
+        Object.defineProperty(window, "localStorage", {
+          value: localStorageMock,
+        });
+
+        window.localStorage.setItem(
+          "user",
+          JSON.stringify({
+            type: "Employee",
+            email: "a@a",
+          })
+        );
+
+        const createSpy = jest.spyOn(mockStore.bills(), "create");
+
+        const newBill = new NewBill({
+          document,
+          onNavigate: jest.fn(),
+          store: mockStore,
+          localStorage: window.localStorage,
+        });
+        const handleChangeFile = jest.fn(newBill.handleChangeFile);
+        const file = screen.getByTestId("file");
+        file.addEventListener("change", handleChangeFile);
+
+        fireEvent.change(file, {
+          target: {
+            files: [
+              new File(["image.png"], "image.png", { type: "image/png" }),
+            ],
+          },
+        });
+
+        await newBill.handleChangeFile;
+
+        expect(createSpy).toHaveBeenCalledWith({
+          data: expect.any(FormData),
+          headers: {
+            noContentType: true,
+          },
+        });
+
+        expect(createSpy).toHaveBeenCalled();
+      });
     });
 
     test("fetches bills from mock API GET", async () => {
