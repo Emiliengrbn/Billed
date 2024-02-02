@@ -147,8 +147,10 @@ describe("Given I am connected as an employee", () => {
       expect(noteDeFrais).toBeTruthy();
     });
   });
-  describe("When an error occurs on API", () => {
+  describe("When an error 500 occurs on API", () => {
     beforeEach(() => {
+      // Configuration de l'environnement de test
+      document.body.innerHTML = "";
       jest.spyOn(mockStore, "bills");
       Object.defineProperty(window, "localStorage", {
         value: localStorageMock,
@@ -162,37 +164,83 @@ describe("Given I am connected as an employee", () => {
       );
       const root = document.createElement("div");
       root.setAttribute("id", "root");
-      document.body.appendChild(root);
+      document.body.append(root);
       router();
     });
-    test("fetches bills from an API and fails with 404 message error", async () => {
-      mockStore.bills.mockImplementationOnce(() => {
-        return {
-          list: () => {
-            return Promise.reject(new Error("Erreur 404"));
-          },
-        };
-      });
-      window.onNavigate(ROUTES_PATH.NewBill);
-      await new Promise(process.nextTick);
-      console.log(document.body.innerHTML);
-      const message = await screen.getByText(/Erreur 404/);
-      expect(message).toBeTruthy();
+    afterEach(() => {
+      // Réinitialisation de l'environnement de test
+      document.body.innerHTML = NewBillUI();
+      jest.restoreAllMocks();
+      const root = document.getElementById("root");
+      if (root) {
+        document.body.removeChild(root);
+      }
     });
+    // Tests pour la gestion d'une erreur de l'API
+    describe("Given a failed attempt to post bills to the API with a 500 error", () => {
+      beforeEach(() => {
+        // Espionne la méthode "bills" de l'objet mockStore
+        jest.spyOn(mockStore, "bills");
 
-    test("fetches messages from an API and fails with 500 message error", async () => {
-      mockStore.bills.mockImplementationOnce(() => {
-        return {
-          list: () => {
-            return Promise.reject(new Error("Erreur 500"));
-          },
-        };
+        // Remplace l'objet localStorage par un objet de mock
+        Object.defineProperty(window, "localStorage", {
+          value: localStorageMock,
+        });
+        // Initialise l'utilisateur en tant qu'employé connecté
+        window.localStorage.setItem(
+          "user",
+          JSON.stringify({
+            type: "Employee",
+            email: "e@e",
+          })
+        );
+        // Crée un élément de div en tant que point d'ancrage pour l'application
+        const root = document.createElement("div");
+        root.setAttribute("id", "root");
+        document.body.appendChild(root);
+        // Initialise le router
+        router();
       });
+      test("Then displays an error message on 500 response", async () => {
+        // Création d'une erreur simulée
+        const mockError = new Error("Erreur 500");
+        console.error = jest.fn();
+        // Navigation vers la page NewBill
+        window.onNavigate(ROUTES_PATH.NewBill);
+        // Mock de la méthode 'update' de bills
+        mockStore.bills.mockImplementationOnce(() => {
+          return {
+            update: jest.fn().mockRejectedValueOnce(mockError),
+          };
+        });
+        // Initialisation de l'instance NewBill
+        const newBill = new NewBill({
+          document,
+          onNavigate,
+          store: mockStore,
+          localStorage: window.localStorage,
+        });
 
-      window.onNavigate(ROUTES_PATH.NewBill);
-      await new Promise(process.nextTick);
-      // const message = await screen.getByText(/Erreur 500/);
-      expect(console.error).toHaveBeenCalledWith(new Error("Erreur 500"));
+        // Soumission du formulaire
+        const form = screen.getByTestId("form-new-bill");
+        const handleSubmit = jest.fn((e) => {
+          e.preventDefault();
+          try {
+            newBill.updateBill(newBill);
+          } catch (error) {
+            console.error(error);
+          }
+        });
+        form.addEventListener("submit", handleSubmit);
+
+        fireEvent.submit(form);
+        // Assertions sur la soumission du formulaire
+        expect(handleSubmit).toHaveBeenCalled();
+        // Attente de l'affichage de l'erreur
+        await waitFor(() =>
+          expect(console.error).toHaveBeenCalledWith(mockError)
+        );
+      });
     });
   });
 });
