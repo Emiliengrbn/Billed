@@ -4,10 +4,10 @@
 
 Ce projet est le 9e projet de la formation ["Développeur d'applications JavaScript et React"](https://openclassrooms.com/fr/paths/516-developpeur-dapplication-javascript-react) de Openclassrooms et a pour but d'évaluer certaines compétences :
 
-- Ecrire des tests unitaires avec JavaScript
+- Écrire des tests unitaires avec JavaScript
 - Rédiger un plan de test end-to-end manuel
 - Débugger une application web avec le Chrome Debugger
-- Ecrire des tests d'intégration avec JavaScript
+- Écrire des tests d'intégration avec JavaScript
 
 ## Scénario
 
@@ -15,11 +15,11 @@ Dans ce projet, je suis un développeur front-end dans l'entreprise Billed, une 
 
 Actuellement, une équipe travaille sur une fonctionnalité pour gérer les notes de frais. Suite au départ d'un développeur de l'équipe, j'ai été désigné pour le remplacer afin de maintenir le calendrier prévu.
 
-Ma mission est de debugger les parcours “Employé” et “Administrateur” de cette application. Il faut aussi écrire des tests unitaires, des tests d’intégration et rédiger un plan de test End-to-End pour le parcours “Employé”.
+Ma mission est de debugger les parcours employé et administrateur de cette application. Il faut aussi écrire des tests unitaires, des tests d’intégration et rédiger un plan de test End-to-End pour le parcours employé.
 
-Pour la redaction des tests il faudra utiliser le framework Jest.
+Pour la rédaction des tests il faudra utiliser le framework Jest.
 
-## Insatallation
+## Installation
 
 Si vous souhaitez reprendre ce projet, vous pouvez suivre les indications ci-contre :
 
